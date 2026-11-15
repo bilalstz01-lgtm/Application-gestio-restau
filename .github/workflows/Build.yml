@@ -9,6 +9,10 @@ jobs:
       - uses: actions/checkout@v4
       - name: Decompresser le projet
         run: unzip -q resto_caisse.zip
+      - name: Corriger printer.dart
+        run: |
+          sed -i 's/\.copyWith(marginAll: 2 \* PdfPageFormat\.mm);/;/' resto_caisse/lib/printer.dart
+          sed -i 's/pageFormat: fmt,/pageFormat: fmt, margin: pw.EdgeInsets.all(2 * PdfPageFormat.mm),/' resto_caisse/lib/printer.dart
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
