@@ -7,6 +7,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Decompresser le projet
+        run: unzip -q resto_caisse.zip
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
@@ -15,15 +17,20 @@ jobs:
         with:
           channel: stable
       - name: Preparer Android
+        working-directory: resto_caisse
         run: |
           flutter create --org com.monresto --project-name resto_caisse --platforms android /tmp/gen
           cp -r /tmp/gen/android ./android
           M=android/app/src/main/AndroidManifest.xml
           sed -i 's#<application#<uses-permission android:name="android.permission.INTERNET"/>\n    <uses-permission android:name="android.permission.BLUETOOTH" android:maxSdkVersion="30"/>\n    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" android:maxSdkVersion="30"/>\n    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT"/>\n    <uses-permission android:name="android.permission.BLUETOOTH_SCAN" android:usesPermissionFlags="neverForLocation"/>\n    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" android:maxSdkVersion="30"/>\n    <application#' $M
           sed -i 's#android:label="[^"]*"#android:label="Caisse Resto"#' $M
-      - run: flutter pub get
-      - run: flutter build apk --release
+      - name: Dependances
+        working-directory: resto_caisse
+        run: flutter pub get
+      - name: Compiler
+        working-directory: resto_caisse
+        run: flutter build apk --release
       - uses: actions/upload-artifact@v4
         with:
           name: caisse-resto-apk
-          path: build/app/outputs/flutter-apk/app-release.apk
+          path: resto_caisse/build/app/outputs/flutter-apk/app-release.apk
